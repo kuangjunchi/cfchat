@@ -170,15 +170,34 @@ ipcMain.handle('activate', async (_event, id) => {
 });
 
 app.whenReady().then(() => {
+  const smokeTest = process.argv.includes('--smoke-test');
   win = new BrowserWindow({
     width: 770, height: 620, minWidth: 590, minHeight: 440,
+    show: !smokeTest,
     title: '比特 WhatsApp 消息监控',
     backgroundColor: '#f6f8fa',
     webPreferences: { preload: require('node:path').join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
   win.loadFile('index.html');
-  win.webContents.once('did-finish-load', refresh);
-  timer = setInterval(refresh, POLL_MS);
+  if (smokeTest) {
+    const deadline = setTimeout(() => {
+      console.error('SMOKE_TIMEOUT: 界面加载超时');
+      app.exit(1);
+    }, 15000);
+    win.webContents.once('did-finish-load', () => {
+      clearTimeout(deadline);
+      console.log('SMOKE_OK: 界面已加载');
+      app.quit();
+    });
+    win.webContents.once('did-fail-load', (_event, code, description) => {
+      clearTimeout(deadline);
+      console.error(`SMOKE_FAILED: ${code} ${description}`);
+      app.exit(1);
+    });
+  } else {
+    win.webContents.once('did-finish-load', refresh);
+    timer = setInterval(refresh, POLL_MS);
+  }
 });
 
 app.on('window-all-closed', () => {
