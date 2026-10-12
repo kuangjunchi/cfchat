@@ -25,6 +25,7 @@ jobs:
         run: |
           codesign --force --deep --sign - dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app
           codesign --verify --deep --strict --verbose=2 dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app
+          dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app/Contents/MacOS/BitWhatsAppWatch --version
           mkdir -p release
           ditto dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app release/BitWhatsAppWatch.app
           cp Open-on-Mac.command release/

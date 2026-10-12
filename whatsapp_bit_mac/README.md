@@ -4,7 +4,7 @@
 
 ## 使用
 
-1. 解压 `dist/比特WhatsApp消息监控-macOS-AppleSilicon-修复版.zip`，保持 `BitWhatsAppWatch.app` 和 `Open-on-Mac.command` 在同一个文件夹。首次运行时双击 `Open-on-Mac.command`，让这台 Mac 完成临时签名并打开应用。
+1. 解压 `dist/github_mac/比特WhatsApp消息监控-macOS-AppleSilicon-原生构建.zip`，保持 `BitWhatsAppWatch.app` 和 `Open-on-Mac.command` 在同一个文件夹。首次运行时双击 `Open-on-Mac.command`，让这台 Mac 清除下载隔离标记并打开应用。
 2. 在同一台 Mac 上启动比特浏览器，确保本地 API 已开启（默认 `127.0.0.1:54345`）。
 3. 打开需要监控的比特窗口，在其中登录 `web.whatsapp.com`。
 4. 程序默认监控所有已打开窗口。也可以切换“按分组”，选择分组后只看该分组当前已打开的窗口。
@@ -16,7 +16,7 @@
 
 ## 重新构建
 
-项目根目录的 `.github/workflows/bit-whatsapp-watch-mac.yml` 可在 GitHub Actions 的 Apple Silicon Mac 运行器上打包并进行临时签名。仓库里也有 `build_mac_zip.py`，可从 Electron 官方发布的 ARM64 ZIP 组装应用，并保留 macOS 权限与符号链接。
+项目根目录的 `.github/workflows/bit-whatsapp-watch-mac.yml` 可在 GitHub Actions 的 Apple Silicon Mac 运行器上打包并进行临时签名。`build_mac_zip.py` 只供排查和临时修复；正式交付以 GitHub 原生构建包为准。
 
 在 macOS 上本地构建：
 
