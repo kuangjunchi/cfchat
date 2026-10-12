@@ -1,0 +1,36 @@
+name: Build macOS Apple Silicon app
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'whatsapp_bit_mac/**'
+
+jobs:
+  build:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: whatsapp_bit_mac
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: whatsapp_bit_mac/package-lock.json
+      - run: npm ci
+      - run: node --test test_monitor.js
+      - run: npm run build:mac
+      - name: Sign and verify on macOS
+        run: |
+          codesign --force --deep --sign - dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app
+          codesign --verify --deep --strict --verbose=2 dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app
+          mkdir -p release
+          ditto dist/BitWhatsAppWatch-darwin-arm64/BitWhatsAppWatch.app release/BitWhatsAppWatch.app
+          cp Open-on-Mac.command release/
+          chmod +x release/Open-on-Mac.command
+          ditto -c -k --sequesterRsrc --keepParent release dist/比特WhatsApp消息监控-macOS-AppleSilicon-原生构建.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BitWhatsAppWatch-macOS-AppleSilicon
+          path: whatsapp_bit_mac/dist/比特WhatsApp消息监控-macOS-AppleSilicon-原生构建.zip

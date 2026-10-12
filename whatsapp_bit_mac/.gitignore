@@ -1,0 +1,5 @@
+node_modules/
+vendor/
+stage/
+dist/
+__pycache__/

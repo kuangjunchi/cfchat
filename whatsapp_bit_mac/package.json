@@ -1,0 +1,19 @@
+{
+  "name": "bit-whatsapp-watch",
+  "productName": "比特 WhatsApp 消息监控",
+  "version": "1.0.0",
+  "description": "在 macOS 上监控比特浏览器 WhatsApp Web 窗口的未读消息",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-packager . BitWhatsAppWatch --platform=darwin --arch=arm64 --out=dist --overwrite --asar --app-bundle-id=cn.xiaochi.bitwhatsappwatch --ignore=^/dist$"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.1.1",
+    "electron": "38.3.0"
+  }
+}

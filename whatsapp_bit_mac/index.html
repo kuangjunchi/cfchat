@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>比特 WhatsApp 消息监控</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-icon">W</div>
+    <div class="brand-copy">
+      <h1>WhatsApp 消息监控</h1>
+      <p>比特浏览器窗口 · macOS</p>
+    </div>
+    <div id="connection" class="connection"><span class="connection-dot"></span><span>正在连接</span></div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="监控设置">
+      <div class="mode-switch" role="group" aria-label="监控模式">
+        <button id="mode-open" class="mode active" type="button">已打开窗口</button>
+        <button id="mode-group" class="mode" type="button">按分组</button>
+      </div>
+      <label id="group-wrap" class="group-wrap hidden">分组
+        <select id="group"><option value="">选择分组</option></select>
+      </label>
+      <button id="refresh" class="refresh" type="button" title="立即刷新" aria-label="立即刷新">↻</button>
+    </section>
+
+    <section class="summary">
+      <div><strong id="window-count">0</strong><span>个已打开窗口</span></div>
+      <div><strong id="whatsapp-count">0</strong><span>个 WhatsApp 页面</span></div>
+      <div class="unread-summary"><strong id="alert-count">0</strong><span>个有新消息</span></div>
+    </section>
+
+    <div class="list-heading"><span>窗口</span><span>状态</span></div>
+    <div id="window-list" class="window-list"></div>
+    <div id="empty" class="empty hidden">
+      <div class="empty-icon">◎</div>
+      <strong id="empty-title">没有已打开的比特窗口</strong>
+      <p id="empty-help">打开比特浏览器窗口并登录 WhatsApp Web 后，这里会自动出现。</p>
+    </div>
+    <p id="error" class="error hidden" role="alert"></p>
+  </main>
+
+  <footer><span class="pulse"></span>每 5 秒自动检查 · 点击有绿点的窗口即可置前并清除提示</footer>
+  <script src="renderer.js"></script>
+</body>
+</html>
