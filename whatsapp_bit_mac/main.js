@@ -158,8 +158,10 @@ ipcMain.handle('refresh', refresh);
 ipcMain.handle('activate', async (_event, id) => {
   const entry = entries.get(String(id));
   if (!entry) throw new Error('该窗口已关闭');
-  if (!entry.tab) throw new Error('这个窗口没有可激活的 WhatsApp 页面');
-  await activateTab(entry.tab);
+  if (entry.tab) {
+    try { await activateTab(entry.tab); }
+    catch { /* 调试页面不可用时，仍尝试前置已打开的浏览器窗口 */ }
+  }
   try { await focusMacWindow(entry.port); }
   catch (error) {
     throw new Error(`${error.message}。请在 macOS「系统设置 → 隐私与安全性 → 辅助功能」中允许本程序控制窗口`);
@@ -172,7 +174,7 @@ ipcMain.handle('activate', async (_event, id) => {
 app.whenReady().then(() => {
   const smokeTest = process.argv.includes('--smoke-test');
   win = new BrowserWindow({
-    width: 770, height: 620, minWidth: 590, minHeight: 440,
+    width: 770, height: 620, minWidth: 330, minHeight: 440,
     show: !smokeTest,
     title: '比特 WhatsApp 消息监控',
     backgroundColor: '#f6f8fa',

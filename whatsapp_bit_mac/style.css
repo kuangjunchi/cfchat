@@ -1,6 +1,6 @@
 :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; color: #1c2e30; background: #f5f8f7; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 590px; }
+body { margin: 0; min-width: 330px; }
 button, select { font: inherit; }
 .topbar { height: 86px; display: flex; align-items: center; padding: 0 29px; gap: 14px; color: white; background: linear-gradient(110deg, #075e54, #128c7e); }
 .brand-icon { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; color: #075e54; background: white; font-size: 24px; font-weight: 800; box-shadow: 0 5px 13px #003d3544; }
@@ -46,3 +46,29 @@ select { max-width: 195px; min-width: 148px; height: 37px; padding: 0 10px; bord
 .error { margin: 13px 0 0; padding: 10px 12px; border-radius: 9px; background: #fff0ed; color: #a84639; font-size: 12px; }
 .hidden { display: none !important; }
 footer { position: absolute; bottom: 0; width: 100%; display: flex; align-items: center; gap: 8px; padding: 13px 30px; border-top: 1px solid #e5ece8; background: #f5f8f7; color: #94a39b; font-size: 11px; }
+@media (max-width: 500px) {
+  .topbar { height: 72px; padding: 0 13px; gap: 10px; }
+  .brand-icon { width: 35px; height: 35px; border-radius: 11px; font-size: 19px; }
+  h1 { font-size: 16px; }
+  .brand-copy p { font-size: 10px; }
+  .connection { padding: 8px; }
+  .connection span:last-child { display: none; }
+  main { padding: 15px 12px 12px; }
+  .toolbar { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .mode-switch { grid-column: 1; grid-row: 1; width: max-content; }
+  .mode { padding: 8px 10px; font-size: 12px; }
+  .group-wrap { grid-column: 1 / -1; grid-row: 2; }
+  .group-wrap select { flex: 1; max-width: none; min-width: 0; }
+  .refresh { grid-column: 2; grid-row: 1; }
+  .summary { margin: 16px 0; padding: 12px 0; }
+  .summary strong { font-size: 19px; }
+  .summary span { font-size: 10px; }
+  .window-list { max-height: calc(100vh - 295px); }
+  .window-row { gap: 8px; padding: 10px; }
+  .avatar { width: 31px; height: 31px; font-size: 12px; }
+  .row-title { font-size: 12px; }
+  .row-subtitle { font-size: 10px; }
+  .row-status { gap: 5px; font-size: 10px; }
+  .green-dot { width: 9px; height: 9px; box-shadow: 0 0 0 3px #24ce6722; }
+  footer { padding: 10px 12px; font-size: 10px; }
+}

@@ -26,7 +26,6 @@ function render() {
     const row = document.createElement('button');
     row.type = 'button';
     row.className = `window-row${item.alert ? ' alert' : ''}`;
-    row.disabled = !item.hasWhatsapp;
     const avatar = document.createElement('span');
     avatar.className = 'avatar';
     avatar.textContent = item.seq ? String(item.seq).slice(-2) : 'W';
@@ -49,7 +48,7 @@ function render() {
       status.textContent = item.error ? '读取失败' : (item.hasWhatsapp ? '无新消息' : '未打开 WhatsApp');
     }
     row.append(avatar, copy, status);
-    row.title = item.error || (item.hasWhatsapp ? '点击前置此窗口' : '请在该窗口打开 WhatsApp Web');
+    row.title = item.error ? `点击前置此窗口；${item.error}` : '点击前置此窗口';
     row.addEventListener('click', async () => {
       message('');
       try { await window.monitor.activate(item.id); }
