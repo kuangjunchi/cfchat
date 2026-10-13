@@ -17,6 +17,9 @@ test('按比特窗口 ID 前置其对应进程，而不是调试端口所属进�
       assert.match(args[1], /unix id is 4321/);
       assert.doesNotMatch(args[1], /9876/);
       assert.match(args[1], /AXRaise/);
+      assert.match(args[1], /AXMinimized/);
+      assert.match(args[1], /set visible of targetProcess to true/);
+      assert.match(args[1], /return \(frontmost of targetProcess\) and/);
       return { stdout: 'true\n' };
     }
   });
@@ -43,7 +46,7 @@ test('系统没有切到目标进程前台时报告失败', async () => {
     api: async () => ({ target: 4321 }),
     execFileAsync: async () => ({ stdout: 'false\n' })
   });
-  await assert.rejects(focus('target'), /没有成为前台程序/);
+  await assert.rejects(focus('target'), /没有显示在屏幕最前面/);
 });
 
 test('窗口 ID 没有有效进程号时不尝试前置', async () => {

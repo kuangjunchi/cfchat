@@ -13,10 +13,21 @@ function createWindowFocuser({ api, execFileAsync = defaultExecFileAsync, platfo
 
     const script = `tell application "System Events"
 set targetProcess to first application process whose unix id is ${pid}
+set visible of targetProcess to true
+set targetWindow to front window of targetProcess
+try
+  if (value of attribute "AXMinimized" of targetWindow) is true then
+    set value of attribute "AXMinimized" of targetWindow to false
+  end if
+end try
 set frontmost of targetProcess to true
-perform action "AXRaise" of front window of targetProcess
+perform action "AXRaise" of targetWindow
 delay 0.2
-return frontmost of targetProcess
+set isMinimized to false
+try
+  set isMinimized to value of attribute "AXMinimized" of targetWindow
+end try
+return (frontmost of targetProcess) and (visible of targetProcess) and (not isMinimized)
 end tell`;
     let stdout;
     try {
@@ -24,7 +35,7 @@ end tell`;
     } catch (error) {
       throw new Error(`${error.message}。请在 macOS「系统设置 → 隐私与安全性 → 辅助功能」中允许本程序控制窗口`);
     }
-    if (String(stdout).trim() !== 'true') throw new Error('目标浏览器窗口没有成为前台程序');
+    if (String(stdout).trim() !== 'true') throw new Error('目标浏览器窗口没有显示在屏幕最前面');
   };
 }
 
