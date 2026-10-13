@@ -22,7 +22,7 @@ jobs:
       - run: node --test test_focus.js test_monitor.js
       - name: Compile native window focus script
         run: |
-          node -e "require('./focus').createWindowFocuser({platform:'darwin',api:async()=>({x:1}),execFileAsync:async(_,args)=>require('fs').writeFileSync('/tmp/bit-focus.applescript',args[1])})('x')"
+          node -e "require('./focus').createWindowFocuser({platform:'darwin',api:async()=>({x:1}),execFileAsync:async(_,args)=>{require('fs').writeFileSync('/tmp/bit-focus.applescript',args[1]);return {stdout:'true'}}})('x')"
           osacompile -o /tmp/bit-focus.scpt /tmp/bit-focus.applescript
       - run: npm run build:mac
       - name: Sign and verify on macOS
