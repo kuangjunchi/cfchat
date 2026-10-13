@@ -1,10 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const http = require('node:http');
-const { execFile } = require('node:child_process');
-const { promisify } = require('node:util');
 const { inspectWindow, activateTab } = require('./cdp');
+const { createWindowFocuser } = require('./focus');
 
-const execFileAsync = promisify(execFile);
 const API_HOST = '127.0.0.1';
 const API_PORT = 54345;
 const POLL_MS = 5000;
@@ -43,6 +41,8 @@ function api(path, body = {}) {
     req.end(data);
   });
 }
+
+const focusMacWindow = createWindowFocuser({ api });
 
 async function allPages(path, extra = {}) {
   const items = [];
@@ -129,15 +129,6 @@ async function refresh() {
   }
 }
 
-async function focusMacWindow(port) {
-  if (process.platform !== 'darwin') return;
-  const { stdout } = await execFileAsync('/usr/sbin/lsof', ['-nP', '-t', `-iTCP:${port}`, '-sTCP:LISTEN'], { timeout: 4000 });
-  const pid = Number(stdout.trim().split(/\s+/)[0]);
-  if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error('找不到浏览器窗口进程');
-  const script = `tell application "System Events"\nset targetProcess to first application process whose unix id is ${pid}\nset frontmost of targetProcess to true\ntry\nperform action "AXRaise" of front window of targetProcess\nend try\nend tell`;
-  await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 5000 });
-}
-
 ipcMain.handle('groups', async () => {
   const groups = await allPages('/group/list', { all: true });
   return groups.map(item => ({ id: String(item.id), name: String(item.groupName || item.name || item.id) }));
@@ -162,10 +153,7 @@ ipcMain.handle('activate', async (_event, id) => {
     try { await activateTab(entry.tab); }
     catch { /* 调试页面不可用时，仍尝试前置已打开的浏览器窗口 */ }
   }
-  try { await focusMacWindow(entry.port); }
-  catch (error) {
-    throw new Error(`${error.message}。请在 macOS「系统设置 → 隐私与安全性 → 辅助功能」中允许本程序控制窗口`);
-  }
+  await focusMacWindow(entry.id);
   entry.acknowledged = entry.signature || '';
   entry.alert = false;
   send('state', { connected: true, entries: viewEntries(), mode, groupId });
