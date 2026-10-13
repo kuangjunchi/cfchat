@@ -17,6 +17,7 @@ test('按比特窗口 ID 前置其对应进程，而不是调试端口所属进�
       assert.match(args[1], /unix id is 4321/);
       assert.doesNotMatch(args[1], /9876/);
       assert.match(args[1], /AXRaise/);
+      return { stdout: 'true\n' };
     }
   });
 
@@ -34,6 +35,15 @@ test('窗口抬起失败时把错误传回界面', async () => {
     execFileAsync: async () => { throw new Error('AXRaise failed'); }
   });
   await assert.rejects(focus('target'), /AXRaise failed/);
+});
+
+test('系统没有切到目标进程前台时报告失败', async () => {
+  const focus = createWindowFocuser({
+    platform: 'darwin',
+    api: async () => ({ target: 4321 }),
+    execFileAsync: async () => ({ stdout: 'false\n' })
+  });
+  await assert.rejects(focus('target'), /没有成为前台程序/);
 });
 
 test('窗口 ID 没有有效进程号时不尝试前置', async () => {

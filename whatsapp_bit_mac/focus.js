@@ -15,12 +15,16 @@ function createWindowFocuser({ api, execFileAsync = defaultExecFileAsync, platfo
 set targetProcess to first application process whose unix id is ${pid}
 set frontmost of targetProcess to true
 perform action "AXRaise" of front window of targetProcess
+delay 0.2
+return frontmost of targetProcess
 end tell`;
+    let stdout;
     try {
-      await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 5000 });
+      ({ stdout } = await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 5000 }));
     } catch (error) {
       throw new Error(`${error.message}。请在 macOS「系统设置 → 隐私与安全性 → 辅助功能」中允许本程序控制窗口`);
     }
+    if (String(stdout).trim() !== 'true') throw new Error('目标浏览器窗口没有成为前台程序');
   };
 }
 
