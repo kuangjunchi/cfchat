@@ -9,6 +9,7 @@ const POLL_MS = 5000;
 let win;
 let mode = 'open';
 let groupId = '';
+let ignoreMuted = true;
 let timer;
 let scanning = false;
 let profileCache = { key: '', at: 0, profiles: [] };
@@ -98,13 +99,13 @@ async function refresh() {
         alert: old.alert || false, error: ''
       });
     }
-    send('state', { connected: true, entries: viewEntries(), mode, groupId });
+    send('state', { connected: true, entries: viewEntries(), mode, groupId, ignoreMuted });
     for (let i = 0; i < selected.length; i += 8) {
       await Promise.all(selected.slice(i, i + 8).map(async ([id]) => {
         const entry = entries.get(id);
         if (!entry) return;
         try {
-          const result = await inspectWindow(entry.port);
+          const result = await inspectWindow(entry.port, ignoreMuted);
           entry.hasWhatsapp = result.hasWhatsapp;
           entry.count = result.count;
           entry.tab = result.tab;
@@ -120,10 +121,10 @@ async function refresh() {
           entry.hasWhatsapp = false;
         }
       }));
-      send('state', { connected: true, entries: viewEntries(), mode, groupId });
+      send('state', { connected: true, entries: viewEntries(), mode, groupId, ignoreMuted });
     }
   } catch (error) {
-    send('state', { connected: false, error: error.message, entries: viewEntries(), mode, groupId });
+    send('state', { connected: false, error: error.message, entries: viewEntries(), mode, groupId, ignoreMuted });
   } finally {
     scanning = false;
   }
@@ -146,6 +147,16 @@ ipcMain.handle('choose-mode', async (_event, nextMode, nextGroupId) => {
 
 ipcMain.handle('refresh', refresh);
 
+ipcMain.handle('set-ignore-muted', async (_event, value) => {
+  ignoreMuted = Boolean(value);
+  for (const entry of entries.values()) {
+    entry.alert = false;
+    entry.acknowledged = '';
+  }
+  send('state', { connected: true, entries: viewEntries(), mode, groupId, ignoreMuted });
+  await refresh();
+});
+
 ipcMain.handle('activate', async (_event, id) => {
   const entry = entries.get(String(id));
   if (!entry) throw new Error('该窗口已关闭');
@@ -156,7 +167,7 @@ ipcMain.handle('activate', async (_event, id) => {
   await focusMacWindow(entry.id);
   entry.acknowledged = entry.signature || '';
   entry.alert = false;
-  send('state', { connected: true, entries: viewEntries(), mode, groupId });
+  send('state', { connected: true, entries: viewEntries(), mode, groupId, ignoreMuted });
 });
 
 app.whenReady().then(() => {

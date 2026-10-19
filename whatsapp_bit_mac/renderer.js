@@ -1,5 +1,5 @@
 const byId = id => document.getElementById(id);
-let state = { connected: false, entries: [], mode: 'open', groupId: '' };
+let state = { connected: false, entries: [], mode: 'open', groupId: '', ignoreMuted: true };
 let chosenMode = 'open';
 let chosenGroup = '';
 
@@ -13,6 +13,7 @@ function render() {
   byId('mode-open').classList.toggle('active', chosenMode === 'open');
   byId('mode-group').classList.toggle('active', chosenMode === 'group');
   byId('group-wrap').classList.toggle('hidden', chosenMode !== 'group');
+  byId('ignore-muted').checked = state.ignoreMuted;
   const connection = byId('connection');
   connection.className = `connection ${state.connected ? 'ok' : 'bad'}`;
   connection.lastElementChild.textContent = state.connected ? '已连接比特' : '等待比特浏览器';
@@ -113,5 +114,14 @@ byId('refresh').addEventListener('click', async () => {
   message('');
   try { await window.monitor.refresh(); }
   catch (error) { message(error.message); }
+});
+byId('ignore-muted').addEventListener('change', async event => {
+  const value = event.target.checked;
+  message('');
+  try { await window.monitor.setIgnoreMuted(value); }
+  catch (error) {
+    byId('ignore-muted').checked = state.ignoreMuted;
+    message(`切换静音过滤失败：${error.message}`);
+  }
 });
 render();

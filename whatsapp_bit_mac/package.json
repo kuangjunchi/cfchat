@@ -1,7 +1,7 @@
 {
   "name": "bit-whatsapp-watch",
   "productName": "比特 WhatsApp 消息监控",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "在 macOS 上监控比特浏览器 WhatsApp Web 窗口的未读消息",
   "main": "main.js",
   "private": true,

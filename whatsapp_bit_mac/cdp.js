@@ -41,7 +41,9 @@ function cdpCommand(wsUrl, method, params = {}, timeoutMs = 3500) {
   });
 }
 
-const READ_UNREAD = `(() => {
+function readUnreadExpression(ignoreMuted = true) {
+  return `(() => {
+  const ignoreMuted = ${Boolean(ignoreMuted)};
   const title = document.title || '';
   const titleCount = Number((title.match(/^\\((\\d+)\\)/) || [])[1] || 0);
   const icons = [
@@ -57,23 +59,36 @@ const READ_UNREAD = `(() => {
     if (!row || rows.includes(row)) continue;
     rows.push(row);
   }
-  const details = rows.map(row => (row.innerText || '').trim().slice(0, 350)).sort();
-  const count = Math.max(titleCount, rows.length);
-  return { count, signature: count ? JSON.stringify([titleCount, details]) : '' };
+  const mutedIcon = '[data-icon="mute"], [data-icon="muted"], [data-icon="volume-off"], [data-icon^="mute-"], [data-icon$="-mute"], [data-icon$="-muted"], [data-icon*="-mute-"], [data-testid="mute"], [data-testid="muted"], [data-testid^="mute-"], [data-testid$="-mute"], [data-testid$="-muted"], [data-testid*="-mute-"]';
+  const isMuted = row => {
+    if (row.querySelector(mutedIcon)) return true;
+    return [row, ...(row.querySelectorAll?.('[aria-label], [title]') || [])].some(el =>
+      /(?:\\bmuted\\b|静音|免打扰|silenciad[oa]s?|sourdine|stummgeschaltet|silenziat[oa]|كتم)/i.test(
+        [el.getAttribute?.('aria-label'), el.getAttribute?.('title')].filter(Boolean).join(' ')
+      )
+    );
+  };
+  const selectedRows = ignoreMuted ? rows.filter(row => !isMuted(row)) : rows;
+  const details = selectedRows.map(row => (row.innerText || '').trim().slice(0, 350)).sort();
+  const count = ignoreMuted ? selectedRows.length : Math.max(titleCount, rows.length);
+  return { count, signature: count ? JSON.stringify(ignoreMuted ? details : [titleCount, details]) : '' };
 })()`;
+}
+
+const READ_UNREAD = readUnreadExpression(true);
 
 async function listWhatsappTabs(port) {
   const tabs = await getJson(`http://127.0.0.1:${port}/json/list`);
   return tabs.filter(tab => tab.type === 'page' && /^https:\/\/web\.whatsapp\.com(?:\/|$)/i.test(tab.url || '') && tab.webSocketDebuggerUrl);
 }
 
-async function inspectWindow(port) {
+async function inspectWindow(port, ignoreMuted = true) {
   const tabs = await listWhatsappTabs(port);
   if (!tabs.length) return { hasWhatsapp: false, count: 0, signature: '', tab: null };
   const results = await Promise.all(tabs.map(async tab => {
     try {
       const response = await cdpCommand(tab.webSocketDebuggerUrl, 'Runtime.evaluate', {
-        expression: READ_UNREAD,
+        expression: readUnreadExpression(ignoreMuted),
         returnByValue: true,
         awaitPromise: false
       });
@@ -105,4 +120,4 @@ async function activateTab(tab) {
   } catch { /* macOS 的原生置前会继续执行 */ }
 }
 
-module.exports = { inspectWindow, activateTab, getJson, cdpCommand, READ_UNREAD };
+module.exports = { inspectWindow, activateTab, getJson, cdpCommand, READ_UNREAD, readUnreadExpression };
